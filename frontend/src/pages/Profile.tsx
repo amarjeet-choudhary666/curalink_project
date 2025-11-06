@@ -9,10 +9,6 @@ import ResearcherProfileEdit from '../components/ResearcherProfileEdit';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { apiService } from '../services/api';
 
-interface User {
-  id: string;
-  role: 'PATIENT' | 'RESEARCHER';
-}
 
 interface PatientProfile {
   userId: string;

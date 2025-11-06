@@ -2,29 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import type { RootState } from '../store';
+import type { MeetingRequest } from '../types/api';
 import apiService from '../services/api';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Breadcrumb from '../components/Breadcrumb';
 
-interface MeetingRequest {
-  id: string;
-  message?: string;
-  scheduledFor?: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  sender: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
-  recipient: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  };
+interface MeetingRequestsResponse {
+  meetingRequests: MeetingRequest[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 const MyMeetingRequests: React.FC = () => {
@@ -67,7 +54,8 @@ const MyMeetingRequests: React.FC = () => {
       console.log('API response:', response);
       
       if (response.success && response.data) {
-        setMeetingRequests(response.data.meetingRequests || []);
+        const data = response.data as MeetingRequestsResponse;
+        setMeetingRequests(data.meetingRequests || []);
       } else {
         setError(response.message || 'Failed to load meeting requests');
       }

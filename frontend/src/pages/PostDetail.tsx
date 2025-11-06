@@ -6,36 +6,7 @@ import { useCreateReplyMutation } from '../features/reply/replyApi';
 import LoadingSpinner from '../components/LoadingSpinner';
 import type { RootState } from '../store';
 
-interface Reply {
-  id: string;
-  body: string;
-  createdAt: string;
-  author: {
-    id: string;
-    name?: string;
-    email: string;
-    role: string;
-  };
-}
 
-interface Post {
-  id: string;
-  title: string;
-  body: string;
-  createdAt: string;
-  author: {
-    id: string;
-    name?: string;
-    email: string;
-    role: string;
-  };
-  community: {
-    id: string;
-    slug: string;
-    title: string;
-  };
-  replies: Reply[];
-}
 
 const PostDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -93,9 +64,17 @@ const PostDetail = () => {
   }
 
   if (error || !post) {
+    const errorMessage = error 
+      ? 'data' in error 
+        ? (error.data as any)?.message || 'Failed to load post'
+        : 'message' in error 
+        ? error.message || 'Failed to load post'
+        : 'Failed to load post'
+      : 'Post not found';
+
     return (
       <div className="text-center py-8">
-        <p className="text-red-600 mb-4">{error || 'Post not found'}</p>
+        <p className="text-red-600 mb-4">{errorMessage}</p>
         <Link
           to="/community"
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -211,7 +190,7 @@ const PostDetail = () => {
               <p className="text-gray-500">No replies yet. Be the first to reply!</p>
             </div>
           ) : (
-            post.replies.map((reply) => (
+            post.replies.map((reply: any) => (
               <div key={reply.id} className="p-6">
                 <div className="flex items-start space-x-3">
                   <div className="flex-1">

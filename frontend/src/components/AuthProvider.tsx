@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import type { RootState } from '../store';
+import type { RootState, AppDispatch } from '../store';
 import { setUser, setLoading, clearAuth } from '../features/auth/authSlice';
 import { fetchUserFavorites, clearFavorites } from '../store/favoritesSlice';
 import apiService from '../services/api';
@@ -10,8 +10,8 @@ interface AuthProviderProps {
 }
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const dispatch = useDispatch();
-  const { token, user, isAuthenticated } = useSelector((state: RootState) => state.auth as any);
+  const dispatch = useDispatch<AppDispatch>();
+  const { token, user  } = useSelector((state: RootState) => state.auth as any);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -51,7 +51,6 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           dispatch(setLoading(false));
         }
       } else if (user && user.id) {
-        // If we have user data, ensure favorites are loaded
         dispatch(fetchUserFavorites(user.id));
       } else if (!token && !user) {
         // No auth data, clear favorites

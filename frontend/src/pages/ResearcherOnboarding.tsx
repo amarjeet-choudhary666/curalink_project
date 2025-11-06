@@ -24,7 +24,6 @@ const ResearcherOnboarding: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
   } = useForm<ResearcherOnboardingData>();
 
   const specialties = [

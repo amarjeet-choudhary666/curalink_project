@@ -32,7 +32,6 @@ const AddClinicalTrial: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm<ClinicalTrialFormData>();
 
   // Redirect if not authenticated or not a researcher

@@ -82,7 +82,7 @@ const Footer: React.FC = () => {
             </div>
             
             <div className="flex space-x-4">
-              {socialLinks.map((social, index) => (
+              {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}

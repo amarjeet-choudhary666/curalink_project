@@ -101,7 +101,6 @@ const Dashboard: React.FC = () => {
   }
 
   const isPatient = user?.role === 'PATIENT';
-  const isResearcher = user?.role === 'RESEARCHER';
 
   // If not authenticated, show a demo message
   if (!isAuthenticated || !user) {

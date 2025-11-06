@@ -5,13 +5,6 @@ import { useListCommunitiesQuery } from '../features/community/communityApi';
 import LoadingSpinner from '../components/LoadingSpinner';
 import type { RootState } from '../store';
 
-interface Community {
-  id: string;
-  slug: string;
-  title: string;
-  description?: string;
-  createdAt: string;
-}
 
 const CommunitiesList = () => {
   const authState = useSelector((state: RootState) => state.auth as any);
@@ -88,7 +81,7 @@ const CommunitiesList = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {communities.map((community) => (
+        {communities.map((community: any) => (
           <div key={community.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
             <div className="p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
@@ -7,14 +7,12 @@ const MobileNav: React.FC = () => {
   const location = useLocation();
   const authState = useSelector((state: RootState) => state.auth as any);
   const { user, isAuthenticated } = authState;
-  const [isOpen, setIsOpen] = useState(false);
 
   if (!isAuthenticated || !user) {
     return null;
   }
 
   const isPatient = user?.role === 'PATIENT';
-  const isResearcher = user?.role === 'RESEARCHER';
 
   const navItems = [
     { to: '/dashboard', label: 'Dashboard', icon: '📊' },

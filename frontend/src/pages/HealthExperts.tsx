@@ -59,9 +59,10 @@ const HealthExperts: React.FC = () => {
       if (searchTerm) params.search = searchTerm;
 
       const response = await apiService.listResearchers(params);
-      
+
       if (response.success && response.data) {
-        const researchers = response.data.researchers.map((researcher: any) => ({
+        const data = response.data as { researchers: any[] };
+        const researchers = data.researchers.map((researcher: any) => ({
           id: researcher.id,
           userId: researcher.user.id,
           name: researcher.user.name || 'Unknown',

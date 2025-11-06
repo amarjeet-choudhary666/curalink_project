@@ -1,6 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
-import type { ApiResponse, LoginResponse, User, ClinicalTrial, Publication, MeetingRequest } from '../types/api';
+import type { ApiResponse, LoginResponse, User} from '../types/api';
 
 interface FavoritesResponse {
   publications: never[];
@@ -63,7 +63,6 @@ class ApiService {
             return {
               success: false,
               message: data.message,
-              data: null,
             };
           }
         }
@@ -118,8 +117,8 @@ class ApiService {
   }
 
   // User endpoints
-  async getUserById(id: string) {
-    return this.request(`/users/${id}`);
+  async getUserById(id: string): Promise<ApiResponse<User>> {
+    return this.request<User>(`/users/${id}`);
   }
 
   async updateUser(id: string, userData: Partial<{
@@ -171,9 +170,9 @@ class ApiService {
     search?: string;
     limit?: number;
     offset?: number;
-  } = {}) {
+  } = {}): Promise<ApiResponse<{ researchers: any[] }>> {
     const queryString = new URLSearchParams(params as any).toString();
-    return this.request(`/researcher-profiles?${queryString}`);
+    return this.request<{ researchers: any[] }>(`/researcher-profiles?${queryString}`);
   }
 
   async getResearcherProfile(userId: string) {
@@ -493,9 +492,9 @@ class ApiService {
     status?: string;
     limit?: number;
     offset?: number;
-  } = {}) {
+  } = {}): Promise<ApiResponse<{ connections: any[]; total: number; limit: number; offset: number }>> {
     const queryString = new URLSearchParams(params as any).toString();
-    return this.request(`/connections/user/${userId}?${queryString}`);
+    return this.request<{ connections: any[]; total: number; limit: number; offset: number }>(`/connections/user/${userId}?${queryString}`);
   }
 
   async acceptConnection(id: string) {
