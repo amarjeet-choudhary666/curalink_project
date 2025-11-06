@@ -178,21 +178,3 @@ npm run preview
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## 📄 License
-
-This project is licensed under the ISC License.
-
-## 👥 Support
-
-For support, please contact the development team or create an issue in the repository.
-
-## 🔄 Future Enhancements
-
-- [ ] Real-time notifications
-- [ ] Video consultation integration
-- [ ] Advanced AI diagnostics
-- [ ] Multi-language support
-- [ ] Mobile app development
-- [ ] Integration with medical devices
-- [ ] Advanced analytics dashboard
