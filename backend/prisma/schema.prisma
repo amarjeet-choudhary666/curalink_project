@@ -1,0 +1,235 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+
+enum Role {
+  PATIENT
+  RESEARCHER
+  ADMIN
+}
+
+enum TrialStatus {
+  RECRUITING
+  ACTIVE_NOT_RECRUITING
+  COMPLETED
+  TERMINATED
+  UNKNOWN
+}
+
+enum TrialPhase {
+  PHASE_0
+  PHASE_1
+  PHASE_2
+  PHASE_3
+  PHASE_4
+  N_A
+}
+
+enum PublicationType {
+  JOURNAL
+  PREPRINT
+  CONFERENCE
+  OTHER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  phone     String?  @unique
+  name      String?
+  password  String
+  role      Role     @default(PATIENT)
+  // Basic profile info (generic)
+  bio       String?
+  location  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isActive  Boolean  @default(true)
+
+  // Role-specific optional relations
+  patientProfile PatientProfile?
+  researcher     ResearcherProfile?
+
+  // Relations
+  favoritesTrials      FavoriteTrial[]
+  favoritesPubs        FavoritePublication[]
+  favoritesResearchers FavoriteResearcher[]
+  meetingRequestsSent  MeetingRequest[]      @relation("sentRequests")
+  meetingRequestsRecv  MeetingRequest[]      @relation("recvRequests")
+
+  posts       Post[] // forum posts (patients create posts; researchers reply)
+  replies     Reply[] // replies authored by researchers
+  connections Connection[] @relation("requester") // collaborator connections where this user is source
+  connectedBy Connection[] @relation("target") // collaborator connections where this user is target
+}
+
+model PatientProfile {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String   @unique
+  // medical info
+  conditions   String[] @default([]) // e.g. ["Brain Cancer", "Glioma"]
+  about        String?
+  preferRemote Boolean  @default(false)
+  // filters & preferences can be stored in JSON for quick MVP flexibility
+  preferences  Json?
+}
+
+model ResearcherProfile {
+  id           String               @id @default(uuid())
+  user         User                 @relation(fields: [userId], references: [id])
+  userId       String               @unique
+  specialties  String[]             @default([]) // e.g. ["Oncology","Immunology"]
+  interests    String[]             @default([]) // research interests: ["Immunotherapy"]
+  orcid        String?
+  researchgate String?
+  availability Boolean              @default(true)
+  // publications imported flag / metadata
+  meta         Json?
+  publications Publication[]
+  trials       ClinicalTrial[]
+  favorites    FavoriteResearcher[]
+}
+
+model ClinicalTrial {
+  id           String      @id @default(uuid())
+  externalId   String?     @unique // e.g., ClinicalTrials.gov NCT#
+  title        String
+  summary      String?
+  eligibility  String? // free text or JSON in future
+  phase        TrialPhase  @default(N_A)
+  status       TrialStatus @default(UNKNOWN)
+  locations    String[]    @default([]) // city, country list
+  contactEmail String?
+  startDate    DateTime?
+  endDate      DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Who posted / manages this trial on platform
+  ownerId String?
+  owner   ResearcherProfile? @relation(fields: [ownerId], references: [id])
+
+  // Links
+  externalUrl String?
+  tags        String[] @default([])
+
+  // Relations
+  favorites FavoriteTrial[]
+}
+
+model Publication {
+  id           String                @id @default(uuid())
+  title        String
+  abstract     String?
+  authors      String[]              @default([]) // simple array for MVP
+  journal      String?
+  year         Int?
+  doi          String?               @unique
+  url          String?
+  type         PublicationType       @default(JOURNAL)
+  createdAt    DateTime              @default(now())
+  researcherId String?
+  researcher   ResearcherProfile?    @relation(fields: [researcherId], references: [id])
+  favorites    FavoritePublication[]
+}
+
+model FavoriteTrial {
+  id        String        @id @default(uuid())
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String
+  trial     ClinicalTrial @relation(fields: [trialId], references: [id])
+  trialId   String
+  createdAt DateTime      @default(now())
+
+  @@unique([userId, trialId])
+}
+
+model FavoritePublication {
+  id            String      @id @default(uuid())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String
+  publication   Publication @relation(fields: [publicationId], references: [id])
+  publicationId String
+  createdAt     DateTime    @default(now())
+
+  @@unique([userId, publicationId])
+}
+
+model FavoriteResearcher {
+  id           String            @id @default(uuid())
+  user         User              @relation(fields: [userId], references: [id])
+  userId       String
+  researcher   ResearcherProfile @relation(fields: [researcherId], references: [id])
+  researcherId String
+  createdAt    DateTime          @default(now())
+
+  @@unique([userId, researcherId])
+}
+
+model MeetingRequest {
+  id           String    @id @default(uuid())
+  sender       User      @relation("sentRequests", fields: [senderId], references: [id])
+  senderId     String
+  recipient    User      @relation("recvRequests", fields: [recipientId], references: [id])
+  recipientId  String
+  message      String?
+  scheduledFor DateTime?
+  status       String    @default("PENDING") // PENDING / ACCEPTED / REJECTED / CANCELLED
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Community {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  description String?
+  createdBy   String? // user id (researcher/ admin)
+  createdAt   DateTime @default(now())
+  threads     Post[]
+}
+
+model Post {
+  id          String     @id @default(uuid())
+  community   Community? @relation(fields: [communityId], references: [id])
+  communityId String?
+  author      User       @relation(fields: [authorId], references: [id])
+  authorId    String
+  title       String
+  body        String
+  createdAt   DateTime   @default(now())
+  replies     Reply[]
+  locked      Boolean    @default(false)
+}
+
+model Reply {
+  id        String   @id @default(uuid())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+  author    User     @relation(fields: [authorId], references: [id]) // typically researcher
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Connection {
+  id          String   @id @default(uuid())
+  requester   User     @relation("requester", fields: [requesterId], references: [id])
+  requesterId String
+  target      User     @relation("target", fields: [targetId], references: [id])
+  targetId    String
+  status      String   @default("PENDING") // PENDING / CONNECTED / REJECTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([requesterId, targetId])
+}
